@@ -1,0 +1,22 @@
+{
+  "name": "dev-tinder-be",
+  "version": "1.0.0",
+  "description": "Tinder for devs",
+  "main": "app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "keywords": [
+    "Nodejs",
+    "javascript",
+    "mongodb",
+    "express"
+  ],
+  "author": "Bharat Singhani",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
+
