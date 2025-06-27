@@ -2,6 +2,11 @@ const { Schema, model } = require("mongoose");
 
 const userSchema = new Schema(
   {
+    about: {
+      default: "This is the default about of the user.",
+      type: String,
+      maxLength: 200,
+    },
     age: {
       min: 18,
       type: Number,
@@ -43,11 +48,14 @@ const userSchema = new Schema(
         "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG.png",
       type: String,
     },
-    about: {
-      default: "This is the default about of the user.",
-      type: String,
+    skills: {
+      type: [String],
+      validate(value) {
+        if (value.length > 10) {
+          throw new Error("Can not add more than 10 skills");
+        }
+      },
     },
-    skills: [String],
   },
   { timestamps: true }
 );
