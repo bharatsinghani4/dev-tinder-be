@@ -1,6 +1,8 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 const connectDB = require("./config/database");
 const User = require("./models/user");
@@ -9,6 +11,7 @@ const validateSignUpData = require("./utils/validation");
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 // Signup
 app.post("/signup", async (req, res) => {
@@ -65,10 +68,35 @@ app.post("/login", async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (isPasswordValid) {
+      const token = await jwt.sign({ _id: user._id }, "Singhani@1304");
+
+      res.cookie("token", token);
       res.send("Login successful!");
     } else {
       throw new Error("Invalid credentials.");
     }
+  } catch (error) {
+    res.status(400).send("Error: " + error.message);
+  }
+});
+
+// User profile
+app.get("/profile", async (req, res) => {
+  try {
+    const { token } = req.cookies;
+
+    if (!token) {
+      throw new Error("Session expired. Please login.");
+    }
+
+    const { _id } = await jwt.verify(token, "Singhani@1304");
+    const user = await User.findOne({ _id });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    res.send(user);
   } catch (error) {
     res.status(400).send("Error: " + error.message);
   }
