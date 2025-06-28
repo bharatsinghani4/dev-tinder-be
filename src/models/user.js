@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const validator = require("validator");
 
 const userSchema = new Schema(
   {
@@ -17,6 +18,11 @@ const userSchema = new Schema(
       required: true,
       trim: true,
       unique: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Invalid email address");
+        }
+      },
     },
     firstName: {
       maxLength: 30,
@@ -42,11 +48,21 @@ const userSchema = new Schema(
       trim: true,
       type: String,
       required: true,
+      validate(value) {
+        if (!validator.isStrongPassword(value)) {
+          throw new Error("Enter a strong password");
+        }
+      },
     },
     photoURL: {
       default:
         "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG.png",
       type: String,
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Invalid photo url");
+        }
+      },
     },
     skills: {
       type: [String],
