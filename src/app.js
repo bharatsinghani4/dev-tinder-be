@@ -2,7 +2,6 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
 const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
 
 const connectDB = require("./config/database");
 const User = require("./models/user");
