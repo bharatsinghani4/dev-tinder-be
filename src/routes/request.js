@@ -51,12 +51,12 @@ requestRouter.post(
         status,
       });
 
-      await connectionRequest.save();
+      const updatedConnectionRequest = await connectionRequest.save();
       res.json({
         message: `${req.user.firstName + req.user.lastName} has marked ${
           toUser.firstName + toUser.lastName
         } as ${status}`,
-        data: connectionRequest,
+        data: updatedConnectionRequest,
       });
     } catch (error) {
       res.status(400).send("Error: " + error.message);
@@ -64,14 +64,43 @@ requestRouter.post(
   }
 );
 
-// Review connection request - accept
+// Review connection request - accepted/rejected
 requestRouter.post(
-  "/request/review/:status/:fromUserId",
+  "/request/review/:status/:requestId",
   userAuth,
   async (req, res) => {
     try {
       const toUserId = req.user._id;
-      const { fromUserId, status } = req.params;
+      const { requestId, status } = req.params;
+      const ALLOWED_STATUSES = ["accepted", "rejected"];
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId,
+        status: "interested",
+      });
+
+      // Validate status from allowed statuses
+      if (!ALLOWED_STATUSES.includes(status)) {
+        return res
+          .status(400)
+          .json({ message: "Invalid status type: " + status });
+      }
+
+      // The request id must be valid
+      if (!connectionRequest) {
+        return res
+          .status(404)
+          .json({ message: "Connection request not found" });
+      }
+
+      connectionRequest.status = status;
+
+      const updatedConnectionRequest = await connectionRequest.save();
+
+      res.json({
+        message: `The connection is ${status}`,
+        data: updatedConnectionRequest,
+      });
     } catch (error) {
       res.status(400).send("Error: " + error.message);
     }
