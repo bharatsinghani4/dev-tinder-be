@@ -35,7 +35,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 });
 
 // Get al the pending connection requests for the looged in user
-userRouter.get("/user/requests/recieved", userAuth, async (req, res) => {
+userRouter.get("/user/requests/received", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
     const pendingRequests = await ConnectionRequest.find({
