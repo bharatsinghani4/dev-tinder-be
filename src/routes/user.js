@@ -20,15 +20,15 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
       .populate("fromUserId", USER_SAFE_DATA)
       .populate("toUserId", USER_SAFE_DATA);
 
-    res.send(
-      connections.map((field) => {
+    res.json({
+      data: connections.map((field) => {
         if (field.fromUserId._id.toString() === loggedInUser._id.toString()) {
           return field.toUserId;
         }
 
         return field.fromUserId;
-      })
-    );
+      }),
+    });
   } catch (error) {
     res.status(400).send("Error: " + error.message);
   }
@@ -43,7 +43,7 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
       status: "interested",
     }).populate("fromUserId", USER_SAFE_DATA);
 
-    res.send(pendingRequests);
+    res.json({ data: pendingRequests });
   } catch (error) {
     res.status(400).send("Error: " + error.message);
   }
@@ -78,7 +78,7 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    res.send(feedUsers);
+    res.json({ data: feedUsers });
   } catch (error) {
     res.status(400).send("Error: " + error.message);
   }

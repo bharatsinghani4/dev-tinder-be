@@ -9,7 +9,7 @@ const userAuth = async (req, res, next) => {
       throw new Error("Invalid token");
     }
 
-    const { _id } = await jwt.verify(token, "Singhani@1304");
+    const { _id } = await jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findOne({ _id });
 
     if (!user) {
