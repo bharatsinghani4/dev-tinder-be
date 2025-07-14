@@ -37,6 +37,12 @@ authRouter.post("/signup", async (req, res) => {
     });
 
     await user.save();
+
+    const token = await user.getJWT();
+
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 24 * 3600000), // cookie will be removed after 24 hours
+    });
     res.json({ data: user, message: "User added successfully" });
   } catch (error) {
     res.status(400).send("Error: " + error.message);
