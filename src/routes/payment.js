@@ -1,7 +1,8 @@
 const express = require("express");
-const {
-  validateWebhookSignature,
-} = require("razorpay/dist/utils/razorpay-utils");
+// const {
+//   validateWebhookSignature,
+// } = require("razorpay/dist/utils/razorpay-utils");
+const crypto = require("crypto");
 
 const razorpayInstance = require("../utils/razorpay");
 const { membershipAmount } = require("../utils/constants");
@@ -40,15 +41,16 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
 
 paymentRouter.post("/payment/webhook", async (req, res) => {
   try {
-    const webhookSignature = req.get("X-Razorpay-Signature");
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    const payload = JSON.stringify(req.body);
+    const receivedSignature = req.get("X-Razorpay-Signature");
 
-    const isWebhookValid = validateWebhookSignature(
-      JSON.stringify(req.body),
-      webhookSignature,
-      process.env.RAZORPAY_WEBHOOK_SECRET
-    );
+    const expectedSignature = crypto
+      .createHmac("sha256", webhookSecret)
+      .update(payload)
+      .digest("hex");
 
-    if (!isWebhookValid) {
+    if (receivedSignature !== expectedSignature) {
       return res.status(400).json({ message: "Webhook signature is invalid" });
     }
 
