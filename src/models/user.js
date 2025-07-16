@@ -78,13 +78,20 @@ const userSchema = new Schema(
         }
       },
     },
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+    membership: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
 
 userSchema.methods.getJWT = async function () {
   const user = this;
-  const token = await jwt.sign({ _id: user._id }, "Singhani@1304", {
+  const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
 
