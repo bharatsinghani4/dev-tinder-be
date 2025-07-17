@@ -5,7 +5,8 @@ const User = require("../models/user");
 const ConnectionRequest = require("../models/connectionRequest");
 
 const userRouter = express.Router();
-const USER_SAFE_DATA = "firstName lastName photoURL skills age about";
+const USER_SAFE_DATA =
+  "firstName lastName photoURL skills age about membership isPremium";
 
 // Get connections
 userRouter.get("/user/connections", userAuth, async (req, res) => {
