@@ -2,23 +2,21 @@ const express = require("express");
 
 const app = express();
 
-app.get("/user", (req, res) => {
+app.get(/.*fly$/, (req, res) => {
   res.send({
     firstName: "Bharat",
     lastName: "Singhani",
   });
 });
 
-app.post("/user", (req, res) => {
-  res.send("User successfully saved to the database!");
+app.use("/user?userId=xyz", (req, res) => {
+  console.log(req.query);
+  res.send("Hello from the server");
 });
 
-app.delete("/user", (req, res) => {
-  res.send("User successfully deleted from the database!");
-});
-
-app.use("/test", (req, res) => {
-  res.send("Hello from the test server");
+app.use("/user/:userId/:name", (req, res) => {
+  console.log(req.params);
+  res.send("Hello from the server");
 });
 
 app.listen(1304, () => {
