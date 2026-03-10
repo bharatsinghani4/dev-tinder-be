@@ -1,32 +1,22 @@
 const express = require("express");
 
+const { adminAuth, userAuth } = require("./middlewares/auth");
+
 const app = express();
 
-app.use(
-  "/user",
-  (req, res, next) => {
-    console.log("Route handler 1");
-    next();
-  },
-  (req, res, next) => {
-    console.log("Route handler 2");
-    next();
-  },
-  [
-    (req, res, next) => {
-      console.log("Route handler 3");
-      next();
-    },
-    (req, res, next) => {
-      console.log("Route handler 4");
-      next();
-    },
-  ],
-  (req, res, next) => {
-    console.log("Route handler 5");
-    res.send("Response 5");
-  },
-);
+app.use("/admin", adminAuth);
+
+app.get("/admin/getAllData", (req, res, next) => {
+  res.send("All data sent");
+});
+
+app.delete("/admin/deleteUser", (req, res, next) => {
+  res.send("User deleted");
+});
+
+app.get("/user", userAuth, (req, res, next) => {
+  res.send("User details");
+});
 
 app.listen(1304, () => {
   console.log("Server is listening on port 1304...");
