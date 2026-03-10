@@ -1,18 +1,37 @@
 const express = require("express");
 
+require("dotenv").config();
+
+const connectDB = require("./config/database");
+const User = require("./models/user");
+
 const app = express();
 
-app.get("/user", (req, res, next) => {
-  throw new Error("sdfsdfssdf");
-  res.send("User data sent");
-});
+// Signup
+app.post("/signup", async (req, res) => {
+  const user = new User({
+    firstName: "Shubhi",
+    lastName: "Jain",
+    emailId: "shubhi.jain@gmail.com",
+    password: "Password@123",
+  });
 
-app.use("/", (err, req, res, next) => {
-  if (err) {
-    res.status(500).send("Something went wrong");
+  try {
+    await user.save();
+    res.send("User added successfully");
+  } catch (error) {
+    res.status(400).send(`Failed to save user: ${error.message}`);
   }
 });
 
-app.listen(1304, () => {
-  console.log("Server is listening on port 1304...");
-});
+connectDB()
+  .then(() => {
+    console.log("Successfully connected to the database!");
+
+    app.listen(process.env.PORT, () => {
+      console.log(`Server is listening on port ${process.env.PORT}...`);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to connect to the database!");
+  });
