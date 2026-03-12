@@ -55,10 +55,10 @@ app.get("/user", async (req, res) => {
 
 // Delete user
 app.delete("/user", async (req, res) => {
-  const _id = req.body._id;
+  const userId = req.body.userId;
 
   try {
-    const user = await User.findByIdAndDelete(_id);
+    const user = await User.findByIdAndDelete(userId);
 
     if (!user) {
       res.status(404).send("User does not exist");
@@ -71,15 +71,25 @@ app.delete("/user", async (req, res) => {
 });
 
 // Update user
-app.patch("/user", async (req, res) => {
-  const _id = req.body._id;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
+  const data = req.body;
 
   try {
-    await User.findByIdAndUpdate(_id, req.body);
+    const ALLOWED_UPDATES = ["about", "age", "gender", "photoUrl", "skills"];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k),
+    );
+
+    if (!isUpdateAllowed) {
+      throw new Error("Update not allowed");
+    }
+
+    await User.findByIdAndUpdate(userId, { data }, { runValidators: true });
 
     res.send("User updated successfully");
   } catch (error) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send("User update failed" + error.message);
   }
 });
 
