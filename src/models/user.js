@@ -34,7 +34,7 @@ const userSchema = new Schema(
     gender: {
       enum: {
         values: ["male", "female", "other"],
-        message: `${VALUE} is not a valid gender type`,
+        message: `{VALUE} is not a valid gender type`,
       },
       type: String,
     },
