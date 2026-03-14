@@ -1,8 +1,8 @@
 const bcrypt = require("bcrypt");
-const validator = require("validator");
+const cookieParser = require("cookie-parser");
 const express = require("express");
-
-require("dotenv").config();
+const jwt = require("jsonwebtoken");
+const validator = require("validator");
 
 const connectDB = require("./config/database");
 const User = require("./models/user");
@@ -11,6 +11,8 @@ const { validateSignUpData } = require("./utils/validation");
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
+require("dotenv").config();
 
 // Signup
 app.post("/signup", async (req, res) => {
@@ -54,6 +56,11 @@ app.post("/login", async (req, res) => {
       res.status(400).send("Invalid credentials");
     }
 
+    const token = await jwt.sign({ _id: user._id }, "Singhani@1304", {
+      expiresIn: "1h",
+    });
+
+    res.cookie("token", token);
     res.send("Login successful");
   } catch (error) {
     res.status(400).send(`ERROR: ${error.message}`);
@@ -72,6 +79,24 @@ app.get("/feed", async (req, res) => {
     res.send(users);
   } catch (err) {
     res.status(400).send("Something went wrong");
+  }
+});
+
+// Profile
+app.get("/profile", async (req, res) => {
+  try {
+    const { token } = req.cookies;
+
+    if (!token) throw new Error("Invalid token");
+
+    const { _id } = await jwt.verify(token, "Singhani@1304");
+    const user = await User.findById(_id);
+
+    if (!user) throw new Error("User doesn't exist");
+
+    res.send(user);
+  } catch (error) {
+    res.status(401).send(`ERROR: ${error.message}`);
   }
 });
 
