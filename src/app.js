@@ -51,15 +51,13 @@ app.post("/login", async (req, res) => {
 
     // Compare password with hashedPassword
     const user = await User.findOne({ emailId });
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.validatePassword(password);
 
     if (!isPasswordValid) {
       res.status(400).send("Invalid credentials");
     }
 
-    const token = await jwt.sign({ _id: user._id }, "Singhani@1304", {
-      expiresIn: "1d",
-    });
+    const token = await user.getJWT();
 
     res.cookie("token", token);
     res.send("Login successful");
