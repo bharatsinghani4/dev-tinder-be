@@ -59,29 +59,41 @@ requestRouter.post(
   },
 );
 
-// Accept connection request
+// Accept/Reject connection request
 requestRouter.post(
-  "/request/review/accepted:requestId",
+  "/request/review/:status/:requestId",
   userAuth,
   async (req, res) => {
-    const user = req.user;
+    try {
+      const loggedInUser = req.user;
+      const { status, requestId } = req.params;
+      const ALLOWED_STATUS = ["accepted", "rejected"];
 
-    console.log("Accepting a connection request");
+      if (!ALLOWED_STATUS.includes(status)) {
+        return res
+          .status(400)
+          .json({ message: `${status} is not a valid status type` });
+      }
 
-    res.send(`${user.firstName} has sent a connection request!`);
-  },
-);
+      const pendingRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId: loggedInUser._id,
+        status: "interested",
+      }).populate("fromUserId", "about age firstName lastName photoURL skills");
 
-// Reject connection request
-requestRouter.post(
-  "/request/review/rejected:requestId",
-  userAuth,
-  async (req, res) => {
-    const user = req.user;
+      if (!pendingRequest)
+        return res
+          .status(404)
+          .json({ message: "Connection request not found" });
 
-    console.log("Rejecting a connection request");
+      pendingRequest.status = status;
 
-    res.send(`${user.firstName} has sent a connection request!`);
+      const data = await pendingRequest.save();
+
+      res.json({ data, message: `Connection request ${status}` });
+    } catch (error) {
+      res.status(400).send(`ERROR: ${error.message}`);
+    }
   },
 );
 
