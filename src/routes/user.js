@@ -3,6 +3,7 @@ const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest");
 
 const userRouter = express.Router();
+
 const USER_SAFE_DATA = "about age firstName lastName photoURL skills";
 
 // Get pending requests recieved by logged in user
@@ -42,13 +43,13 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 
     const data = connections.map((row) => {
       if (row.fromUserId._id.toString() === loggedInUser._id.toString())
-        return row.fromUserId;
+        return row.toUserId;
 
       return row.fromUserId;
     });
 
     res.json({
-      data: connections,
+      data,
       message: "Connections fetched successfully",
     });
   } catch (error) {
