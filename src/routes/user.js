@@ -1,6 +1,9 @@
 const express = require("express");
+
 const { userAuth } = require("../middlewares/auth");
+
 const ConnectionRequest = require("../models/connectionRequest");
+const User = require("../models/user");
 
 const userRouter = express.Router();
 
@@ -22,7 +25,7 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
       message: "Connection requests fetched successfully",
     });
   } catch (error) {
-    res.status(400).send(`ERROR: ${error.message}`);
+    res.status(400).json({ message: `ERROR: ${error.message}` });
   }
 });
 
@@ -53,16 +56,47 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
       message: "Connections fetched successfully",
     });
   } catch (error) {
-    res.status(400).send(`ERROR: ${error.message}`);
+    res.status(400).json({ message: `ERROR: ${error.message}` });
   }
 });
 
 // Get user feed
-userRouter.get("/user/feed", userAuth, async (req, res) => {
+userRouter.get("/user/feed?page=1&limit=10", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
+    const page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    limit = limit > 50 ? 50 : limit;
+    const skip = (page - 1) * limit;
+    let hideUserFromFeed = new Set();
+
+    const connectionRequests = await ConnectionRequest.find({
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+    });
+
+    if (connectionRequests.length) {
+      connectionRequests.forEach((request) => {
+        hideUserFromFeed.add(request.fromUserId);
+        hideUserFromFeed.add(request.toUserId);
+      });
+    }
+
+    const users = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hideUserFromFeed) } },
+        { _id: { $ne: loggedInUser._id } },
+      ],
+    })
+      .select(USER_SAFE_DATA)
+      .skip(skip)
+      .limit(limit);
+
+    const message =
+      users.length ? "Feed fetched successfully" : "No users found";
+
+    res.json({ data: users, message });
   } catch (error) {
-    res.status(400).send(`ERROR: ${error.message}`);
+    res.status(400).json({ message: `ERROR: ${error.message}` });
   }
 });
 

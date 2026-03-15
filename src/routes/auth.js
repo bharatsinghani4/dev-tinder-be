@@ -27,7 +27,7 @@ authRouter.post("/signup", async (req, res) => {
     });
 
     await user.save();
-    res.send("User created successfully");
+    res.json({ message: "User created successfully" });
   } catch (error) {
     res.status(400).send(`ERROR: ${error.message}`);
   }
@@ -63,7 +63,7 @@ authRouter.post("/login", async (req, res) => {
 authRouter.post("/logout", async (req, res) => {
   try {
     res.cookie("token", null);
-    res.send("Logged out successfully");
+    res.json({ message: "Logged out successfully" });
   } catch (error) {
     res.status(400).send(`ERROR: ${error.message}`);
   }
